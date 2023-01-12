@@ -1,0 +1,49 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+
+- name: AUTO GENERATE FILES AND DIRECTORIES
+  hosts: all
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: CREATE DIRECTORIES BASED ON OS
+      ansible.builtin.file:
+        path: ./tmp/{{ ansible_network_os }}/
+        state: directory
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-08 (master)$ ansible-playbook -i inventory auto-create.yml
+
+PLAY [AUTO GENERATE FILES AND DIRECTORIES] *********************************************************************************************************
+
+TASK [CREATE DIRECTORIES BASED ON OS] **************************************************************************************************************
+changed: [eos-spine1]
+ok: [eos-spine2]
+ok: [eos-leaf2]
+ok: [eos-leaf1]
+changed: [csr1]
+ok: [csr2]
+ok: [csr3]
+changed: [vmx1]
+ok: [vmx2]
+ok: [vmx3]
+changed: [nxos-spine1]
+ok: [nxos-spine2]
+
+PLAY RECAP *****************************************************************************************************************************************
+csr1                       : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf1                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf2                  : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine1                 : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine2                 : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine1                : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine2                : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx1                       : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx2                       : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx3                       : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

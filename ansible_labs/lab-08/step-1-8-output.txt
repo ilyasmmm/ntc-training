@@ -1,0 +1,96 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+
+- name: AUTO GENERATE FILES AND DIRECTORIES
+  hosts: all
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: CREATE DIRECTORIES BASED ON OS
+      ansible.builtin.file:
+        path: ./tmp/{{ ansible_network_os }}/
+        state: directory
+
+    - name: CREATE SNMP.CONF FILE
+      ansible.builtin.file:
+        path: ./tmp/{{ ansible_network_os }}/{{ inventory_hostname }}-snmp.conf
+        state: touch
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-08 (master)$ ansible-playbook -i inventory auto-create.yml
+
+PLAY [AUTO GENERATE FILES AND DIRECTORIES] *********************************************************************************************************
+
+TASK [CREATE DIRECTORIES BASED ON OS] **************************************************************************************************************
+ok: [eos-spine1]
+ok: [eos-leaf2]
+ok: [csr1]
+ok: [eos-spine2]
+ok: [eos-leaf1]
+ok: [csr2]
+ok: [csr3]
+ok: [vmx1]
+ok: [vmx2]
+ok: [vmx3]
+ok: [nxos-spine1]
+ok: [nxos-spine2]
+
+TASK [CREATE SNMP.CONF FILE] ***********************************************************************************************************************
+changed: [eos-spine1]
+changed: [eos-spine2]
+changed: [eos-leaf1]
+changed: [eos-leaf2]
+changed: [csr1]
+changed: [csr2]
+changed: [csr3]
+changed: [vmx1]
+changed: [vmx2]
+changed: [vmx3]
+changed: [nxos-spine1]
+changed: [nxos-spine2]
+
+PLAY RECAP *****************************************************************************************************************************************
+csr1                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf1                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf2                  : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine1                 : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine2                 : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine1                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine2                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx1                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx2                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx3                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+
+ntc@ntc-training:lab-08 (master)$ tree
+.
+├── auto-create.yml
+├── inventory
+├── step-1-5-output.txt
+├── step-1-8-output.txt
+└── tmp
+    ├── eos
+    │   ├── eos-leaf1-snmp.conf
+    │   ├── eos-leaf2-snmp.conf
+    │   ├── eos-spine1-snmp.conf
+    │   └── eos-spine2-snmp.conf
+    ├── ios
+    │   ├── csr1-snmp.conf
+    │   ├── csr2-snmp.conf
+    │   └── csr3-snmp.conf
+    ├── junos
+    │   ├── vmx1-snmp.conf
+    │   ├── vmx2-snmp.conf
+    │   └── vmx3-snmp.conf
+    └── nxos
+        ├── nxos-spine1-snmp.conf
+        └── nxos-spine2-snmp.conf
+
+5 directories, 16 files

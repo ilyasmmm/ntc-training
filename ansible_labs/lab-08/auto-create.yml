@@ -1,0 +1,13 @@
+---
+
+- name: AUTO GENERATE FILES AND DIRECTORIES
+  hosts: all
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: DELETE DIRECTORIES PREVIOUSLY CREATED BASED ON OS
+      ansible.builtin.file:
+        path: ./tmp
+        state: absent
