@@ -1,0 +1,13 @@
+ansible-playbook -i inventory user_input.yml
+Please enter the username: ntc
+Please enter the password: 
+
+PLAY [COLLECT USERNAME AND PASSWORD] ****************************************************************************************************************
+
+TASK [DISPLAY THE USERNAME AND PASSWORD] ************************************************************************************************************
+ok: [csr1] => {
+    "msg": "The Username is ntc and password is ntc123"
+}
+
+PLAY RECAP ******************************************************************************************************************************************
+csr1                       : ok=1    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
