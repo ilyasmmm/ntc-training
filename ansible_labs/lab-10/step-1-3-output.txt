@@ -1,0 +1,53 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+
+- name: IOS COMPLIANCE
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: IOS SHOW VERSION
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: output
+
+    - name: CHECK OS AND CONFIG REGISTER
+      ansible.builtin.assert:
+        that:
+          - "'17.01.01' in output['stdout'][0]"
+          - "'0x2102' in output['stdout'][0]"
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-10 (master)$ ansible-playbook -i inventory compliance.yml
+
+PLAY [IOS COMPLIANCE] ******************************************************************************************************************************
+
+TASK [IOS SHOW VERSION] ****************************************************************************************************************************
+ok: [csr1]
+ok: [csr3]
+ok: [csr2]
+
+TASK [CHECK OS AND CONFIG REGISTER] ****************************************************************************************************************
+ok: [csr1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [csr2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [csr3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+PLAY RECAP *****************************************************************************************************************************************
+csr1                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+ 

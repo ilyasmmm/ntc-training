@@ -1,0 +1,927 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+---
+- name: IOS COMPLIANCE
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: IOS SHOW VERSION
+      cisco.ios.ios_command:
+        commands:
+          - show version
+      register: output
+
+    - name: CHECK OS AND CONFIG REGISTER
+      ansible.builtin.assert:
+        that:
+          - "'17.01.01' in output['stdout'][0]"
+          - "'0x2102' in output['stdout'][0]"
+
+- name: JUNOS COMPLIANCE
+  hosts: vmx
+  connection: ansible.netcommon.netconf
+  gather_facts: false
+  tags: vmx
+
+  tasks:
+
+    - name: JUNOS SHOW VERSION
+      junipernetworks.junos.junos_command:
+        commands:
+          - show system storage
+        display: json
+      register: output
+
+    - name: VIEW JSON DATA
+      ansible.builtin.debug:
+        var: output
+
+    - name: CREATE NEW VARIABLES
+      ansible.builtin.set_fact:
+        percent: "{{ output['stdout'][0]['system-storage-information'][0]['filesystem'][0]['used-percent'][0]['data'] }}"
+        filesystem: "{{ output['stdout'][0]['system-storage-information'][0]['filesystem'][0]['filesystem-name'][0]['data'] }}"
+        blocks: "{{ output['stdout'][0]['system-storage-information'][0]['filesystem'][0]['available-blocks'][0]['data'] }}"
+        storage: "{{ output['stdout'][0]['system-storage-information'][0]['filesystem'][0]['available-blocks'][0]['attributes']['junos:format'] }}"
+
+    - name: VIEW DATA STORED IN NEW VARIABLES
+      ansible.builtin.debug:
+        msg: "Percent: {{ percent }}%,  filesystem: {{ filesystem }}, Blocks: {{ blocks }}, Storage: {{ storage }}"
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ntc@ntc-training:lab-10 (master)$ ansible-playbook -i inventory compliance.yml
+
+PLAY [IOS COMPLIANCE] ******************************************************************************************************************************
+
+TASK [IOS SHOW VERSION] ****************************************************************************************************************************
+ok: [csr1]
+ok: [csr3]
+ok: [csr2]
+
+TASK [CHECK OS AND CONFIG REGISTER] ****************************************************************************************************************
+ok: [csr1] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [csr2] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+ok: [csr3] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+PLAY [JUNOS COMPLIANCE] ****************************************************************************************************************************
+
+TASK [JUNOS SHOW VERSION] **************************************************************************************************************************
+ok: [vmx2]
+ok: [vmx3]
+ok: [vmx1]
+
+TASK [VIEW JSON DATA] ******************************************************************************************************************************
+ok: [vmx2] => {
+    "output": {
+        "changed": false,
+        "failed": false,
+        "stdout": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6445408"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6445432"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680664"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3272"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "stdout_lines": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6445408"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6445432"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680664"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3272"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+ok: [vmx1] => {
+    "output": {
+        "changed": false,
+        "failed": false,
+        "stdout": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6448456"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6448480"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680680"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3256"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "stdout_lines": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6448456"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6448480"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680680"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3256"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+ok: [vmx3] => {
+    "output": {
+        "changed": false,
+        "failed": false,
+        "stdout": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6443016"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6443040"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680680"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3256"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "stdout_lines": [
+            {
+                "system-storage-information": [
+                    {
+                        "filesystem": [
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "17G"
+                                        },
+                                        "data": "36061486"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "/dev/gpt/junos"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "20G"
+                                        },
+                                        "data": "41803892"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.1G"
+                                        },
+                                        "data": "2398096"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  6"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6443016"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/tmp"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "3.1G"
+                                        },
+                                        "data": "6443040"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "12K"
+                                        },
+                                        "data": "24"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            },
+                            {
+                                "available-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "332M"
+                                        },
+                                        "data": "680680"
+                                    }
+                                ],
+                                "filesystem-name": [
+                                    {
+                                        "data": "tmpfs"
+                                    }
+                                ],
+                                "mounted-on": [
+                                    {
+                                        "data": "/.mount/mfs"
+                                    }
+                                ],
+                                "total-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "334M"
+                                        },
+                                        "data": "683936"
+                                    }
+                                ],
+                                "used-blocks": [
+                                    {
+                                        "attributes": {
+                                            "junos:format": "1.6M"
+                                        },
+                                        "data": "3256"
+                                    }
+                                ],
+                                "used-percent": [
+                                    {
+                                        "data": "  0"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
+TASK [CREATE NEW VARIABLES] ************************************************************************************************************************
+ok: [vmx1]
+ok: [vmx2]
+ok: [vmx3]
+
+TASK [VIEW DATA STORED IN NEW VARIABLES] ***********************************************************************************************************
+ok: [vmx1] => {
+    "msg": "Percent:   6%,  filesystem: /dev/gpt/junos, Blocks: 36061486, Storage: 17G"
+}
+ok: [vmx2] => {
+    "msg": "Percent:   6%,  filesystem: /dev/gpt/junos, Blocks: 36061486, Storage: 17G"
+}
+ok: [vmx3] => {
+    "msg": "Percent:   6%,  filesystem: /dev/gpt/junos, Blocks: 36061486, Storage: 17G"
+}
+
+PLAY RECAP *****************************************************************************************************************************************
+csr1                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx1                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx2                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx3                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
