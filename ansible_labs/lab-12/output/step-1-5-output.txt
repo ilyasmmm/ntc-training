@@ -1,0 +1,129 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+
+- name: GENERATE SNMP CONFIGS USING JINJA2 - AMERICAS
+  hosts: AMER
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: CREATE CONFIGS DIRECTORY FOR RESULTS
+      ansible.builtin.file:
+        path: ./configs
+        state: directory
+
+    - name: GENERATE IOS SNMP CONFIGURATIONS
+      ansible.builtin.template:
+         src: ios-snmpv2.j2
+         dest: "./configs/{{ inventory_hostname }}-snmp.cfg"
+
+- name: GENERATE SNMP CONFIGS USING JINJA2 - EMEA
+  hosts: EMEA
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: GENERATE JUNOS SNMP CONFIGURATIONS
+      ansible.builtin.template:
+        src: junos-snmpv2.j2
+        dest: "./configs/{{ inventory_hostname }}-snmp.cfg"
+
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-11 (master)$ ansible-playbook -i inventory deploy-snmp.yml
+
+PLAY [GENERATE SNMP CONFIGS USING JINJA2 - AMERICAS] ***************************************************************************************************
+
+TASK [CREATE CONFIGS DIRECTORY FOR RESULTS] ************************************************************************************************************
+ok: [csr1]
+ok: [csr2]
+ok: [csr3]
+
+TASK [VIEW SNMP_RO VARIABLE] ***************************************************************************************************************************
+ok: [csr1] => {
+    "snmp_ro": "ntc_course"
+}
+ok: [csr2] => {
+    "snmp_ro": "ntc_course"
+}
+ok: [csr3] => {
+    "snmp_ro": "ntc_course"
+}
+
+TASK [VIEW SNMP_LOCATION VARIABLE] *********************************************************************************************************************
+ok: [csr1] => {
+    "snmp_location": "NYC"
+}
+ok: [csr2] => {
+    "snmp_location": "NYC"
+}
+ok: [csr3] => {
+    "snmp_location": "NYC"
+}
+
+TASK [GENERATE IOS SNMP CONFIGURATIONS] ****************************************************************************************************************
+ok: [csr3]
+ok: [csr1]
+ok: [csr2]
+
+PLAY [GENERATE SNMP CONFIGS USING JINJA2 - EMEA] *******************************************************************************************************
+
+TASK [VIEW SNMP_RO VARIABLE] ***************************************************************************************************************************
+ok: [vmx1] => {
+    "snmp_ro": "ntc_course"
+}
+ok: [vmx2] => {
+    "snmp_ro": "ntc_course"
+}
+ok: [vmx3] => {
+    "snmp_ro": "ntc_course"
+}
+
+TASK [VIEW SNMP_LOCATION VARIABLE] *********************************************************************************************************************
+ok: [vmx1] => {
+    "snmp_location": "MILAN"
+}
+ok: [vmx2] => {
+    "snmp_location": "MILAN"
+}
+ok: [vmx3] => {
+    "snmp_location": "MILAN"
+}
+
+TASK [GENERATE JUNOS SNMP CONFIGURATIONS] **************************************************************************************************************
+ok: [vmx1]
+ok: [vmx2]
+ok: [vmx3]
+
+PLAY RECAP *********************************************************************************************************************************************
+csr1                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx1                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx2                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx3                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-11 (master)$
+ntc@ntc-training:lab-11 (master)$ ls -l configs
+total 24
+-rw-r--r-- 1 ntc root 129 Jan 12 08:59 csr1-snmp.cfg
+-rw-r--r-- 1 ntc root 129 Jan 12 08:59 csr2-snmp.cfg
+-rw-r--r-- 1 ntc root 129 Jan 12 08:59 csr3-snmp.cfg
+-rw-r--r-- 1 ntc root 162 Jan 12 08:59 vmx1-snmp.cfg
+-rw-r--r-- 1 ntc root 162 Jan 12 08:59 vmx2-snmp.cfg
+-rw-r--r-- 1 ntc root 162 Jan 12 08:59 vmx3-snmp.cfg
+ntc@ntc-training:lab-11 (master)$ 
+ntc@ntc-training:lab-11 (master)$ cat configs/csr1-snmp.cfg
+snmp-server community ntc_course RO
+snmp-server community ntc_private RW
+snmp-server contact netops_team
+snmp-server location NYCntc@ntc-training:lab-11 (master)$ 
+ntc@ntc-training:lab-11 (master)$ cat configs/vmx1-snmp.cfg
+set snmp community ntc_course authorization read-only
+set snmp community ntc_private authorization read-write
+set snmp location MILAN
+set snmp contact netops_teamntc@ntc-training:lab-11 (master)$ 

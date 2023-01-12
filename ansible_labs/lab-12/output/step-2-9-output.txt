@@ -1,0 +1,53 @@
+SCRIPT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+---
+
+- name: GENERATE SNMP CONFIGS USING JINJA2
+  hosts: AMER, EMEA
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: CREATE CONFIGS DIRECTORY FOR RESULTS
+      ansible.builtin.file:
+        path: ./configs
+        state: directory
+
+    - name: GENERATE SNMP CONFIGURATIONS
+      ansible.builtin.template:
+         src: "{{ ansible_network_os }}-snmpv2.j2"
+         dest: "./configs/{{ inventory_hostname }}-snmp.cfg"
+
+
+OUTPUT ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+ntc@ntc-training:lab-11 (master)$ 
+ntc@ntc-training:lab-11 (master)$ 
+ntc@ntc-training:lab-11 (master)$ ansible-inventory -i inventory --host csr3
+{
+    "ansible_network_os": "ios",
+    "ansible_ssh_pass": "ntc123",
+    "ansible_user": "ntc",
+    "ntc_api": "ssh",
+    "ntc_device_type": "csr1000v",
+    "ntc_vendor": "cisco",
+    "snmp_contact": "netops_team",
+    "snmp_location": "NYC",
+    "snmp_ro": "ntc_course",
+    "snmp_rw": "ntc_private"
+}
+ntc@ntc-training:lab-11 (master)$ ansible-inventory -i inventory --host csr1
+{
+    "ansible_network_os": "ios",
+    "ansible_ssh_pass": "ntc123",
+    "ansible_user": "ntc",
+    "ntc_api": "ssh",
+    "ntc_device_type": "csr1000v-ng",
+    "ntc_vendor": "cisco",
+    "snmp_contact": "netops_team",
+    "snmp_location": "NYC",
+    "snmp_ro": "ntc_course",
+    "snmp_rw": "ntc_private"
+}
+ntc@ntc-training:lab-11 (master)$ 

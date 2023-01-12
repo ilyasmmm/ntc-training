@@ -1,0 +1,13 @@
+snmp_ro: ntc_course
+snmp_rw: ntc_private
+snmp_location: NYC
+snmp_contact: netops_team
+snmp_config:
+  ro:
+    - public
+    - ntc-course
+  rw:
+    - private
+    - ntc-private
+  contact: netops_team
+  location: NYC

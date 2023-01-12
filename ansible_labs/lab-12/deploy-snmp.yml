@@ -1,0 +1,18 @@
+---
+
+- name: GENERATE SNMP CONFIGS USING JINJA2
+  hosts: AMER, EMEA
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: CREATE CONFIGS DIRECTORY FOR RESULTS
+      ansible.builtin.file:
+        path: ./configs
+        state: directory
+
+    - name: GENERATE SNMP CONFIGURATIONS
+      ansible.builtin.template:
+         src: "{{ ansible_network_os }}-snmpv2.j2"
+         dest: "./configs/{{ inventory_hostname }}-snmp.cfg"
