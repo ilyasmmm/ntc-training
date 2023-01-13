@@ -1,0 +1,61 @@
+SCRIPT ---
+
+---
+
+- name: CONFIGURING AAA SERVER GROUPS
+  hosts: csr1
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+    - name: DEPLOYING AAA GROUP AND IPS
+      cisco.ios.ios_config:
+        parents:
+          - aaa group server tacacs+ TESTING
+        commands:
+          - server 1.2.3.4
+          - server 2.1.3.4
+          - server 3.2.1.4
+      tags: starting_config
+
+    - name: DEPLOYING AAA GROUP AND IPS
+      cisco.ios.ios_config:
+        parents:
+          - aaa group server tacacs+ TESTING
+        commands:
+          - server 4.3.2.1
+          - server 1.2.3.4
+          - server 2.1.3.4
+          - server 3.2.1.4
+      tags: append_server
+
+    - name: DEPLOYING AAA GROUP AND IPS
+      cisco.ios.ios_config:
+        before: no aaa group server tacacs+ TESTING
+        parents:
+          - aaa group server tacacs+ TESTING
+        commands:
+          - server 4.1.1.1
+          - server 1.2.3.4
+          - server 2.1.3.4
+          - server 3.2.1.5
+        match: exact
+      tags: replace_on_change
+
+OUTPUT ---
+
+
+ntc@ntc-training:lab-15 (master)$ ansible-playbook -i inventory aaa.yml --tags=replace_on_change -v
+Using /etc/ansible/ansible.cfg as config file
+
+PLAY [CONFIGURING AAA SERVER GROUPS] ****************************************************
+
+TASK [DEPLOYING AAA GROUP AND IPS] ******************************************************
+[WARNING]: To ensure idempotency and correct diff the input configuration lines should
+be similar to how they appear if present in the running configuration on device
+changed: [csr1] => {"banners": {}, "changed": true, "commands": ["no aaa group server tacacs+ TESTING", "aaa group server tacacs+ TESTING", "server 4.1.1.1", "server 1.2.3.4", "server 2.1.3.4", "server 3.2.1.5"], "updates": ["no aaa group server tacacs+ TESTING", "aaa group server tacacs+ TESTING", "server 4.1.1.1", "server 1.2.3.4", "server 2.1.3.4", "server 3.2.1.5"]}
+
+PLAY RECAP ******************************************************************************
+csr1                       : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-15 (master)$ 

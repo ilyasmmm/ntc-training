@@ -1,0 +1,45 @@
+SCRIPT ---
+---
+
+- name: CONFIGURING INTERFACES
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: BACKUP CONFIG
+      cisco.ios.ios_config:
+        backup: True
+
+    - name: CONFIGURING LOOPBACK
+      cisco.ios.ios_config:
+        parents:
+          - interface Loopback200
+        commands:
+          - ip address 10.200.100.{{ inventory_hostname[-1] }} 255.255.255.255
+
+OUTPUT ---
+
+
+ntc@ntc-training:lab-15 (master)$ ansible-playbook -i inventory config-interfaces.yml  -v
+Using /etc/ansible/ansible.cfg as config file
+
+PLAY [CONFIGURING INTERFACES] ***********************************************************************************************************************************
+
+TASK [BACKUP CONFIG] ********************************************************************************************************************************************
+changed: [csr2] => {"backup_path": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr2_config.2023-01-13@06:37:53", "changed": true, "date": "2023-01-13", "filename": "csr2_config.2023-01-13@06:37:53", "shortname": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr2_config", "time": "06:37:53"}
+changed: [csr1] => {"backup_path": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr1_config.2023-01-13@06:37:53", "changed": true, "date": "2023-01-13", "filename": "csr1_config.2023-01-13@06:37:53", "shortname": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr1_config", "time": "06:37:53"}
+changed: [csr3] => {"backup_path": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr3_config.2023-01-13@06:37:53", "changed": true, "date": "2023-01-13", "filename": "csr3_config.2023-01-13@06:37:53", "shortname": "/home/ntc/test_code/ansible_labs/lab-15/backup/csr3_config", "time": "06:37:53"}
+
+TASK [CONFIGURING LOOPBACK] *************************************************************************************************************************************
+ok: [csr2] => {"changed": false}
+ok: [csr1] => {"changed": false}
+ok: [csr3] => {"changed": false}
+
+PLAY RECAP ******************************************************************************************************************************************************
+csr1                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-15 (master)$ 

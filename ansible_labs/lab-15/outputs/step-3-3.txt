@@ -1,0 +1,47 @@
+SCRIPT ---
+
+---
+
+- name: USING DIFF AGAINST WITH CONFIG
+  hosts: csr1
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: ENSURE THAT LOOPBACK222 IS CONFIGURED
+      cisco.ios.ios_config:
+        parents:
+          - interface Loopback222
+        commands:
+          - ip address 10.224.222.222 255.255.255.255
+        diff_against: running
+      tags: diff_me
+
+
+OUTPUT ---
+
+
+ntc@ntc-training:lab-15 (master)$ ansible-playbook -i inventory verify-config.yml --tags=diff_me --diff
+
+PLAY [USING DIFF AGAINST WITH CONFIG] ***************************************************
+
+TASK [ENSURE THAT LOOPBACK222 IS CONFIGURED] ********************************************
+--- before
++++ after
+@@ -112,6 +112,8 @@
+  ip address 10.9.88.1 255.255.255.0
+ interface Loopback200
+  ip address 10.200.100.1 255.255.255.255
++interface Loopback222
++ ip address 10.224.222.222 255.255.255.255
+ interface GigabitEthernet1
+  description MANAGEMENT_DO_NOT_CHANGE
+  ip address 10.0.0.15 255.255.255.0
+
+[WARNING]: To ensure idempotency and correct diff the input configuration lines should
+be similar to how they appear if present in the running configuration on device
+changed: [csr1]
+
+PLAY RECAP ******************************************************************************
+csr1                       : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0 

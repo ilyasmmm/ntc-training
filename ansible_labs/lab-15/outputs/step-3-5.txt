@@ -1,0 +1,92 @@
+SCRIPT ---
+
+
+- name: USING DIFF AGAINST WITH CONFIG
+  hosts: csr1
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+
+    - name: ENSURE THAT LOOPBACK222 IS CONFIGURED
+      cisco.ios.ios_config:
+        parents:
+          - interface Loopback222
+        commands:
+          - ip address 10.224.222.222 255.255.255.255
+        diff_against: running
+      tags: diff_me
+
+    - name: CREATE BACKUP FILE VARIABLE
+      ansible.builtin.set_fact:
+        backup_file: "{{ query('fileglob', 'backup/{{ inventory_hostname }}_config.*') | sort | last }}"
+      tags: verify_config
+
+    - name: VERIFY GOLDEN CONFIGURATION
+      cisco.ios.ios_config:
+        diff_against: intended
+        intended_config: "{{ lookup('file', '{{ backup_file }}') }}"
+      tags: verify_config
+
+OUTPUT ---
+
+
+ntc@ntc-training:lab-15 (master)$ ansible-playbook -i inventory verify-config.yml --tags=verify_config --diff
+
+PLAY [USING DIFF AGAINST WITH CONFIG] ***************************************************
+
+TASK [CREATE BACKUP FILE VARIABLE] ******************************************************
+ok: [csr1]
+
+TASK [VERIFY GOLDEN CONFIGURATION] ******************************************************
+--- before
++++ after
+@@ -13,13 +13,7 @@
+  exit-address-family
+  address-family ipv6
+  exit-address-family
+-aaa new-model
+-aaa group server tacacs+ TESTING
+- server 4.1.1.1
+- server 1.2.3.4
+- server 2.1.3.4
+- server 3.2.1.5
+-aaa session-id common
++no aaa new-model
+ call-home
+  contact-email-addr sch-smart-licensing@cisco.com
+  profile "CiscoTAC-1"
+@@ -112,8 +106,6 @@
+  ip address 10.9.88.1 255.255.255.0
+ interface Loopback200
+  ip address 10.200.100.1 255.255.255.255
+-interface Loopback222
+- ip address 10.224.222.222 255.255.255.255
+ interface GigabitEthernet1
+  description MANAGEMENT_DO_NOT_CHANGE
+  ip address 10.0.0.15 255.255.255.0
+@@ -189,14 +181,14 @@
+  stopbits 1
+ line vty 0 4
+  privilege level 15
++ login local
+  transport preferred ssh
+  transport input all
+ line vty 5 15
+  privilege level 15
++ login local
+  transport preferred ssh
+  transport input all
+-line vty 16 30
+- privilege level 15
+ netconf-yang
+ restconf
+ end
+\ No newline at end of file
+
+changed: [csr1]
+
+PLAY RECAP ******************************************************************************
+csr1                       : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-15 (master)$ 
