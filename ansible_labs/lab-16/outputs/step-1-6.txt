@@ -1,0 +1,98 @@
+SCRIPT ---
+---
+
+- name: PLAY 1 - ISSUE API CALL TO CSR
+  hosts: csr2
+  connection: local
+  gather_facts: false
+  tags: ios
+
+  tasks:
+
+    - name: GET INTERFACE IP ADDRESS
+      ansible.builtin.uri:
+        url: https://{{ inventory_hostname }}/restconf/data/Cisco-IOS-XE-native:native/interface=GigabitEthernet/2/ip/address
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_ssh_pass }}"
+        return_content: yes
+        validate_certs: no
+        headers:
+          Content-Type: application/yang-data+json
+          Accept: application/yang-data+json
+      register: response
+
+    - ansible.builtin.debug:
+        var: response
+
+    - ansible.builtin.debug:
+        var: response['content']
+
+    - ansible.builtin.debug:
+        var: response['content']['Cisco-IOS-XE-native:address']['primary']['address']
+        
+OUTPUT ---
+
+ntc@ntc-training:lab-16 (master)$ ansible-playbook -i inventory rest-apis.yml 
+
+PLAY [PLAY 1 - ISSUE API CALL TO CSR] ***************************************************
+
+TASK [GET INTERFACE IP ADDRESS] *********************************************************
+[WARNING]: Module did not set no_log for password
+ok: [csr2]
+
+TASK [ansible.builtin.debug] ************************************************************
+ok: [csr2] => {
+    "response": {
+        "cache_control": "private, no-cache, must-revalidate, proxy-revalidate",
+        "changed": false,
+        "connection": "close",
+        "content": "{\n  \"Cisco-IOS-XE-native:address\": {\n    \"primary\": {\n      \"address\": \"10.1.13.1\",\n      \"mask\": \"255.255.255.0\"\n    }\n  }\n}\n",
+        "content_type": "application/yang-data+json",
+        "cookies": {},
+        "cookies_string": "",
+        "date": "Fri, 13 Jan 2023 07:13:04 GMT",
+        "elapsed": 0,
+        "failed": false,
+        "json": {
+            "Cisco-IOS-XE-native:address": {
+                "primary": {
+                    "address": "10.1.13.1",
+                    "mask": "255.255.255.0"
+                }
+            }
+        },
+        "msg": "OK (unknown bytes)",
+        "pragma": "no-cache",
+        "redirected": false,
+        "server": "nginx",
+        "status": 200,
+        "transfer_encoding": "chunked",
+        "url": "https://csr2/restconf/data/Cisco-IOS-XE-native:native/interface=GigabitEthernet/2/ip/address",
+        "warnings": [
+            "Module did not set no_log for password"
+        ]
+    }
+}
+
+TASK [ansible.builtin.debug] ************************************************************
+ok: [csr2] => {
+    "response['content']": {
+        "Cisco-IOS-XE-native:address": {
+            "primary": {
+                "address": "10.1.13.1",
+                "mask": "255.255.255.0"
+            }
+        }
+    }
+}
+
+TASK [ansible.builtin.debug] ************************************************************
+ok: [csr2] => {
+    "response['content']['Cisco-IOS-XE-native:address']['primary']['address']": "VARIABLE IS NOT DEFINED!"
+}
+
+PLAY RECAP ******************************************************************************
+csr2                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-16 (master)$ 

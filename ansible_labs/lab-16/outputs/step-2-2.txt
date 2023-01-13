@@ -1,0 +1,238 @@
+SCRIPT ---
+
+
+---
+
+- name: PLAY 1 - ISSUE API CALL TO CSR
+  hosts: csr2
+  connection: local
+  gather_facts: false
+  tags: ios
+
+  tasks:
+
+    - name: GET INTERFACE IP ADDRESS
+      ansible.builtin.uri:
+        url: https://{{ inventory_hostname }}/restconf/data/Cisco-IOS-XE-native:native/interface=GigabitEthernet/2/ip/address
+        method: GET
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_ssh_pass }}"
+        return_content: yes
+        validate_certs: no
+        headers:
+          Content-Type: application/yang-data+json
+          Accept: application/yang-data+json
+      register: response
+
+    - ansible.builtin.debug:
+        var: response
+
+    - ansible.builtin.debug:
+        var: response['content']
+
+    - ansible.builtin.set_fact:
+        ip_info: "{{ response['content'] | from_json }}"
+
+    - ansible.builtin.debug:
+        var: ip_info['Cisco-IOS-XE-native:address']['primary']['address']
+
+    - ansible.builtin.set_fact: 
+        ipaddr: "{{ ip_info['Cisco-IOS-XE-native:address']['primary']['address'] }}"
+
+    - ansible.builtin.debug:
+        var: ipaddr
+
+
+- name: PLAY 2 - ISSUE SHOW VERSION TO NEXUS VIA API
+  hosts: nxos-spine1
+  connection: local
+  gather_facts: false
+  tags: nxos
+
+  tasks:
+
+    - name: SHOW VERSION NEXUS API
+      ansible.builtin.uri:
+        url: https://nxos-spine1/ins
+        method: POST
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_ssh_pass }}"
+        return_content: yes
+        validate_certs: no
+        body_format: json
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+        body: |
+          {
+            "ins_api": {
+              "version": "1.0",
+              "type": "cli_show",
+              "chunk": "0",
+              "sid": "1",
+              "input": "show version",
+              "output_format": "json"
+            }
+          }
+      register: response
+
+    - ansible.builtin.debug:
+        var: response
+
+    - ansible.builtin.debug:
+        var: response.content
+        
+OUTPUT ---
+
+
+
+ntc@ntc-training:lab-16 (master)$ ansible-playbook -i inventory rest-apis.yml --tags=nxos
+
+PLAY [PLAY 1 - ISSUE API CALL TO CSR] **************************************************************************************************************************
+
+PLAY [PLAY 2 - ISSUE SHOW VERSION TO NEXUS VIA API] ************************************************************************************************************
+
+TASK [SHOW VERSION NEXUS API] **********************************************************************************************************************************
+[WARNING]: Module did not set no_log for password
+ok: [nxos-spine1]
+
+TASK [ansible.builtin.debug] ***********************************************************************************************************************************
+ok: [nxos-spine1] => {
+    "response": {
+        "access_control_allow_headers": "Origin, X-Requested-With, Content-Type, Accept, devcookie",
+        "access_control_allow_methods": "POST,GET,OPTIONS",
+        "access_control_allow_origin": "http://127.0.0.1:8000",
+        "anticsrf": "HJeBB60L4WDrAdO6G/wJBvtkjGY=",
+        "changed": false,
+        "connection": "close",
+        "content": "{\n\t\"ins_api\":\t{\n\t\t\"type\":\t\"cli_show\",\n\t\t\"version\":\t\"1.0\",\n\t\t\"sid\":\t\"eoc\",\n\t\t\"outputs\":\t{\n\t\t\t\"output\":\t{\n\t\t\t\t\"input\":\t\"show version\",\n\t\t\t\t\"msg\":\t\"Success\",\n\t\t\t\t\"code\":\t\"200\",\n\t\t\t\t\"body\":\t{\n\t\t\t\t\t\"header_str\":\t\"Cisco Nexus Operating System (NX-OS) Software\\nTAC support: http://www.cisco.com/tac\\nDocuments: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html\\nCopyright (c) 2002-2019, Cisco Systems, Inc. All rights reserved.\\nThe copyrights to certain works contained herein are owned by\\nother third parties and are used and distributed under license.\\nSome parts of this software are covered under the GNU Public\\nLicense. A copy of the license is available at\\nhttp://www.gnu.org/licenses/gpl.html.\\n\\nNexus 9000v is a demo version of the Nexus Operating System\\n\",\n\t\t\t\t\t\"bios_ver_str\":\t\"\",\n\t\t\t\t\t\"kickstart_ver_str\":\t\"9.3(3)\",\n\t\t\t\t\t\"nxos_ver_str\":\t\"9.3(3)\",\n\t\t\t\t\t\"bios_cmpl_time\":\t\"\",\n\t\t\t\t\t\"kick_file_name\":\t\"bootflash:///nxos.9.3.3.bin\",\n\t\t\t\t\t\"nxos_file_name\":\t\"bootflash:///nxos.9.3.3.bin\",\n\t\t\t\t\t\"kick_cmpl_time\":\t\"12/22/2019 2:00:00\",\n\t\t\t\t\t\"nxos_cmpl_time\":\t\"12/22/2019 2:00:00\",\n\t\t\t\t\t\"kick_tmstmp\":\t\"12/22/2019 14:00:37\",\n\t\t\t\t\t\"nxos_tmstmp\":\t\"12/22/2019 14:00:37\",\n\t\t\t\t\t\"chassis_id\":\t\"Nexus9000 C9300v Chassis\",\n\t\t\t\t\t\"cpu_name\":\t\"\",\n\t\t\t\t\t\"memory\":\t6097044,\n\t\t\t\t\t\"mem_type\":\t\"kB\",\n\t\t\t\t\t\"proc_board_id\":\t\"9858AEXU1AT\",\n\t\t\t\t\t\"host_name\":\t\"nxos-spine1\",\n\t\t\t\t\t\"bootflash_size\":\t4287040,\n\t\t\t\t\t\"kern_uptm_days\":\t4,\n\t\t\t\t\t\"kern_uptm_hrs\":\t14,\n\t\t\t\t\t\"kern_uptm_mins\":\t3,\n\t\t\t\t\t\"kern_uptm_secs\":\t21,\n\t\t\t\t\t\"rr_reason\":\t\"Unknown\",\n\t\t\t\t\t\"rr_sys_ver\":\t\"\",\n\t\t\t\t\t\"rr_service\":\t\"\",\n\t\t\t\t\t\"plugins\":\t\"Core Plugin, Ethernet Plugin\",\n\t\t\t\t\t\"manufacturer\":\t\"Cisco Systems, Inc.\",\n\t\t\t\t\t\"TABLE_package_list\":\t{\n\t\t\t\t\t\t\"ROW_package_list\":\t{\n\t\t\t\t\t\t\t\"package_id\":\t\"\"\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}",
+        "content_security_policy": "block-all-mixed-content; base-uri 'self'; default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'self'; form-action 'self'; frame-ancestors 'self';",
+        "content_type": "text/json; charset=UTF-8",
+        "cookies": {
+            "nxapi_auth": "qpg:UQ6T12q2L6iqF44Yt/572xZuGHg="
+        },
+        "cookies_string": "nxapi_auth=qpg:UQ6T12q2L6iqF44Yt/572xZuGHg=",
+        "date": "Fri, 13 Jan 2023 07:07:45 GMT",
+        "elapsed": 0,
+        "failed": false,
+        "json": {
+            "ins_api": {
+                "outputs": {
+                    "output": {
+                        "body": {
+                            "TABLE_package_list": {
+                                "ROW_package_list": {
+                                    "package_id": ""
+                                }
+                            },
+                            "bios_cmpl_time": "",
+                            "bios_ver_str": "",
+                            "bootflash_size": 4287040,
+                            "chassis_id": "Nexus9000 C9300v Chassis",
+                            "cpu_name": "",
+                            "header_str": "Cisco Nexus Operating System (NX-OS) Software\nTAC support: http://www.cisco.com/tac\nDocuments: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html\nCopyright (c) 2002-2019, Cisco Systems, Inc. All rights reserved.\nThe copyrights to certain works contained herein are owned by\nother third parties and are used and distributed under license.\nSome parts of this software are covered under the GNU Public\nLicense. A copy of the license is available at\nhttp://www.gnu.org/licenses/gpl.html.\n\nNexus 9000v is a demo version of the Nexus Operating System\n",
+                            "host_name": "nxos-spine1",
+                            "kern_uptm_days": 4,
+                            "kern_uptm_hrs": 14,
+                            "kern_uptm_mins": 3,
+                            "kern_uptm_secs": 21,
+                            "kick_cmpl_time": "12/22/2019 2:00:00",
+                            "kick_file_name": "bootflash:///nxos.9.3.3.bin",
+                            "kick_tmstmp": "12/22/2019 14:00:37",
+                            "kickstart_ver_str": "9.3(3)",
+                            "manufacturer": "Cisco Systems, Inc.",
+                            "mem_type": "kB",
+                            "memory": 6097044,
+                            "nxos_cmpl_time": "12/22/2019 2:00:00",
+                            "nxos_file_name": "bootflash:///nxos.9.3.3.bin",
+                            "nxos_tmstmp": "12/22/2019 14:00:37",
+                            "nxos_ver_str": "9.3(3)",
+                            "plugins": "Core Plugin, Ethernet Plugin",
+                            "proc_board_id": "9858AEXU1AT",
+                            "rr_reason": "Unknown",
+                            "rr_service": "",
+                            "rr_sys_ver": ""
+                        },
+                        "code": "200",
+                        "input": "show version",
+                        "msg": "Success"
+                    }
+                },
+                "sid": "eoc",
+                "type": "cli_show",
+                "version": "1.0"
+            }
+        },
+        "msg": "OK (unknown bytes)",
+        "redirected": false,
+        "server": "nginx/1.7.10",
+        "set_cookie": "nxapi_auth=qpg:UQ6T12q2L6iqF44Yt/572xZuGHg=; Secure; HttpOnly;",
+        "status": 200,
+        "strict_transport_security": "max-age=31536000; includeSubDomains",
+        "transfer_encoding": "chunked",
+        "url": "https://nxos-spine1/ins",
+        "warnings": [
+            "Module did not set no_log for password"
+        ],
+        "x_content_type_options": "nosniff",
+        "x_frame_options": "SAMEORIGIN",
+        "x_xss_protection": "1; mode=block"
+    }
+}
+
+TASK [ansible.builtin.debug] ***********************************************************************************************************************************
+ok: [nxos-spine1] => {
+    "response.content": {
+        "ins_api": {
+            "outputs": {
+                "output": {
+                    "body": {
+                        "TABLE_package_list": {
+                            "ROW_package_list": {
+                                "package_id": ""
+                            }
+                        },
+                        "bios_cmpl_time": "",
+                        "bios_ver_str": "",
+                        "bootflash_size": 4287040,
+                        "chassis_id": "Nexus9000 C9300v Chassis",
+                        "cpu_name": "",
+                        "header_str": "Cisco Nexus Operating System (NX-OS) Software\nTAC support: http://www.cisco.com/tac\nDocuments: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html\nCopyright (c) 2002-2019, Cisco Systems, Inc. All rights reserved.\nThe copyrights to certain works contained herein are owned by\nother third parties and are used and distributed under license.\nSome parts of this software are covered under the GNU Public\nLicense. A copy of the license is available at\nhttp://www.gnu.org/licenses/gpl.html.\n\nNexus 9000v is a demo version of the Nexus Operating System\n",
+                        "host_name": "nxos-spine1",
+                        "kern_uptm_days": 4,
+                        "kern_uptm_hrs": 14,
+                        "kern_uptm_mins": 3,
+                        "kern_uptm_secs": 21,
+                        "kick_cmpl_time": "12/22/2019 2:00:00",
+                        "kick_file_name": "bootflash:///nxos.9.3.3.bin",
+                        "kick_tmstmp": "12/22/2019 14:00:37",
+                        "kickstart_ver_str": "9.3(3)",
+                        "manufacturer": "Cisco Systems, Inc.",
+                        "mem_type": "kB",
+                        "memory": 6097044,
+                        "nxos_cmpl_time": "12/22/2019 2:00:00",
+                        "nxos_file_name": "bootflash:///nxos.9.3.3.bin",
+                        "nxos_tmstmp": "12/22/2019 14:00:37",
+                        "nxos_ver_str": "9.3(3)",
+                        "plugins": "Core Plugin, Ethernet Plugin",
+                        "proc_board_id": "9858AEXU1AT",
+                        "rr_reason": "Unknown",
+                        "rr_service": "",
+                        "rr_sys_ver": ""
+                    },
+                    "code": "200",
+                    "input": "show version",
+                    "msg": "Success"
+                }
+            },
+            "sid": "eoc",
+            "type": "cli_show",
+            "version": "1.0"
+        }
+    }
+}
+
+PLAY RECAP *****************************************************************************************************************************************************
+nxos-spine1                : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-16 (master)$ 
