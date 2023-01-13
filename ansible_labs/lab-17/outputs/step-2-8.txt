@@ -1,0 +1,90 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+SCRIPT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+- name: GATHER IOS FACTS
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  tags: ios
+
+  tasks:
+    - name: GET FACTS
+      cisco.ios.ios_facts:
+
+    - name: DUMP FACTS INTO TEXT FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO CSV FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
+- name: FINAL TASK
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: assemble
+
+  tasks:
+
+      - name: CREATE MASTER TEXT REPORT
+        ansible.builtin.assemble:
+          src: ./docs/text/
+          dest: ./docs/master-text.md
+          delimiter: "---"
+
+      - name: CREATE MASTER CSV REPORT
+        ansible.builtin.assemble:
+          src: ./docs/csv/
+          dest: ./docs/master-csv.csv
+
+      - name: INSERT COLUMNS INTO CSV REPORT
+        ansible.builtin.lineinfile:
+          path: ./docs/master-csv.csv
+          line: "Hostname,Vendor,Model,OS Version,Serial Number"
+          insertbefore: BOF
+          state: present
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+OUTPUT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-17 (master)$ ansible-playbook -i inventory reports.yml 
+
+PLAY [GATHER IOS FACTS] ****************************************************************************************************************************************
+
+TASK [GET FACTS] ***********************************************************************************************************************************************
+ok: [csr3]
+ok: [csr1]
+ok: [csr2]
+
+TASK [DUMP FACTS INTO TEXT FILE] *******************************************************************************************************************************
+ok: [csr3]
+ok: [csr1]
+ok: [csr2]
+
+TASK [DUMP FACTS INTO CSV FILE] ********************************************************************************************************************************
+ok: [csr1]
+ok: [csr2]
+ok: [csr3]
+
+PLAY [FINAL TASK] **********************************************************************************************************************************************
+
+TASK [CREATE MASTER TEXT REPORT] *******************************************************************************************************************************
+ok: [localhost]
+
+TASK [CREATE MASTER CSV REPORT] ********************************************************************************************************************************
+ok: [localhost]
+
+TASK [INSERT COLUMNS INTO CSV REPORT] **************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP *****************************************************************************************************************************************************
+csr1                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-17 (master)$ 

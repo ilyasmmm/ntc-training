@@ -1,0 +1,241 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+SCRIPT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+---
+
+- name: CREATE DIRECTORIES
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: directories
+
+  tasks:
+
+    - ansible.builtin.file:
+        path: ./docs/csv/
+        state: directory
+
+    - ansible.builtin.file:
+        path: ./docs/text/
+        state: directory
+
+- name: GATHER IOS FACTS
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  tags: ios
+
+  tasks:
+    - name: GET FACTS
+      cisco.ios.ios_facts:
+
+    - name: DUMP FACTS INTO TEXT FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO CSV FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
+
+- name: GATHER NXOS FACTS
+  hosts: nxos
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  tags: nxos
+
+  tasks:
+    - name: GET NXOS FACTS
+      cisco.nxos.nxos_facts:
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
+
+- name: GATHER EOS FACTS
+  hosts: eos
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  tags: eos
+
+  tasks:
+    - name: GET EOS FACTS
+      arista.eos.eos_facts:
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
+- name: GATHER JUNOS FACTS
+  hosts: vmx
+  connection: ansible.netcommon.netconf
+  gather_facts: false
+  tags: junos
+
+  tasks:
+    - name: GET FACTS
+      junipernetworks.junos.junos_facts:
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
+- name: FINAL TASK
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: assemble
+
+  tasks:
+
+    - name: CREATE MASTER TEXT REPORT
+      ansible.builtin.assemble:
+        src: ./docs/text/
+        dest: ./docs/master-text.md
+        delimiter: "---"
+
+    - name: CREATE MASTER CSV REPORT
+      ansible.builtin.assemble:
+        src: ./docs/csv/
+        dest: ./docs/master-csv.csv
+
+    - name: INSERT COLUMNS INTO CSV REPORT
+      ansible.builtin.lineinfile:
+        path: ./docs/master-csv.csv
+        line: "Hostname,Vendor,Model,OS Version,Serial Number"
+        insertbefore: BOF
+        state: present
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+OUTPUT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-17 (master)$ ansible-playbook -i inventory reports.yml 
+
+PLAY [CREATE DIRECTORIES] **************************************************************************************************************************************
+
+TASK [ansible.builtin.file] ************************************************************************************************************************************
+ok: [localhost]
+
+TASK [ansible.builtin.file] ************************************************************************************************************************************
+ok: [localhost]
+
+PLAY [GATHER IOS FACTS] ****************************************************************************************************************************************
+
+TASK [GET FACTS] ***********************************************************************************************************************************************
+ok: [csr1]
+ok: [csr3]
+ok: [csr2]
+
+TASK [DUMP FACTS INTO TEXT FILE] *******************************************************************************************************************************
+ok: [csr2]
+ok: [csr3]
+ok: [csr1]
+
+TASK [DUMP FACTS INTO CSV FILE] ********************************************************************************************************************************
+ok: [csr2]
+ok: [csr1]
+ok: [csr3]
+
+PLAY [GATHER NXOS FACTS] ***************************************************************************************************************************************
+
+TASK [GET NXOS FACTS] ******************************************************************************************************************************************
+ok: [nxos-spine2]
+ok: [nxos-spine1]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [nxos-spine2]
+changed: [nxos-spine1]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [nxos-spine1]
+changed: [nxos-spine2]
+
+PLAY [GATHER EOS FACTS] ****************************************************************************************************************************************
+
+TASK [GET EOS FACTS] *******************************************************************************************************************************************
+[WARNING]: default value for `gather_subset` will be changed to `min` from `!config` v2.11 onwards
+ok: [eos-leaf1]
+ok: [eos-spine2]
+ok: [eos-spine1]
+ok: [eos-leaf2]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [eos-spine1]
+changed: [eos-spine2]
+changed: [eos-leaf1]
+changed: [eos-leaf2]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [eos-spine1]
+changed: [eos-spine2]
+changed: [eos-leaf2]
+changed: [eos-leaf1]
+
+PLAY [GATHER JUNOS FACTS] **************************************************************************************************************************************
+
+TASK [GET FACTS] ***********************************************************************************************************************************************
+ok: [vmx3]
+ok: [vmx2]
+ok: [vmx1]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [vmx2]
+changed: [vmx3]
+changed: [vmx1]
+
+TASK [DUMP FACTS INTO FILE] ************************************************************************************************************************************
+changed: [vmx1]
+changed: [vmx2]
+changed: [vmx3]
+
+PLAY [FINAL TASK] **********************************************************************************************************************************************
+
+TASK [CREATE MASTER TEXT REPORT] *******************************************************************************************************************************
+changed: [localhost]
+
+TASK [CREATE MASTER CSV REPORT] ********************************************************************************************************************************
+changed: [localhost]
+
+TASK [INSERT COLUMNS INTO CSV REPORT] **************************************************************************************************************************
+changed: [localhost]
+
+PLAY RECAP *****************************************************************************************************************************************************
+csr1                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf1                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-leaf2                  : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine1                 : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+eos-spine2                 : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=5    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine1                : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+nxos-spine2                : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx1                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx2                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+vmx3                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-17 (master)$ 

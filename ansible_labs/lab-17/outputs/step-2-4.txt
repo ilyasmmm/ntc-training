@@ -1,0 +1,53 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+SCRIPT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+- name: GATHER IOS FACTS
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+  tags: ios
+
+  tasks:
+    - name: GET FACTS
+      cisco.ios.ios_facts:
+
+    - name: DUMP FACTS INTO TEXT FILE
+      ansible.builtin.template:
+        src: facts-text.j2
+        dest: ./docs/text/{{ inventory_hostname }}.md
+
+    - name: DUMP FACTS INTO CSV FILE
+      ansible.builtin.template:
+        src: facts-csv.j2
+        dest: ./docs/csv/{{ inventory_hostname }}.csv
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+OUTPUT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-17 (master)$ ansible-playbook -i inventory reports.yml 
+
+PLAY [GATHER IOS FACTS] ****************************************************************************************************************************************
+
+TASK [GET FACTS] ***********************************************************************************************************************************************
+ok: [csr3]
+ok: [csr1]
+ok: [csr2]
+
+TASK [DUMP FACTS INTO TEXT FILE] *******************************************************************************************************************************
+changed: [csr3]
+changed: [csr1]
+changed: [csr2]
+
+TASK [DUMP FACTS INTO CSV FILE] ********************************************************************************************************************************
+changed: [csr1]
+changed: [csr3]
+changed: [csr2]
+
+PLAY RECAP *****************************************************************************************************************************************************
+csr1                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr2                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+csr3                       : ok=3    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-17 (master)$ 

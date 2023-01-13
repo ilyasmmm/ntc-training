@@ -1,0 +1,306 @@
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+SCRIPT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+---
+
+- name: GATHER IOS FACTS
+  hosts: ios
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  tasks:
+    - name: GET FACTS
+      cisco.ios.ios_facts:
+      register: ntc_ios_facts
+
+    - ansible.builtin.debug:
+        var: ntc_ios_facts
+
+    - name: DEBUG OS VERSION
+      ansible.builtin.debug:
+        var: ntc_ios_facts['ansible_facts']['ansible_net_version']
+
+    - name: DEBUG SHORTHAND OS VERSION
+      ansible.builtin.debug:
+        var: ansible_net_version
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+OUTPUT
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ntc@ntc-training:lab-17 (master)$ ansible-playbook -i inventory core-facts.yml --limit csr1
+
+PLAY [GATHER IOS FACTS] ****************************************************************************************************************************************
+
+TASK [GET FACTS] ***********************************************************************************************************************************************
+ok: [csr1]
+
+TASK [ansible.builtin.debug] ***********************************************************************************************************************************
+ok: [csr1] => {
+    "ntc_ios_facts": {
+        "ansible_facts": {
+            "ansible_net_all_ipv4_addresses": [
+                "10.0.0.15",
+                "10.1.13.1",
+                "10.200.1.20",
+                "10.9.88.1",
+                "10.200.100.1",
+                "10.224.222.222"
+            ],
+            "ansible_net_all_ipv6_addresses": [],
+            "ansible_net_api": "cliconf",
+            "ansible_net_filesystems": [
+                "bootflash:"
+            ],
+            "ansible_net_filesystems_info": {
+                "bootflash:": {
+                    "spacefree_kb": 5330376.0,
+                    "spacetotal_kb": 6139200.0
+                }
+            },
+            "ansible_net_gather_network_resources": [],
+            "ansible_net_gather_subset": [
+                "default",
+                "interfaces",
+                "hardware"
+            ],
+            "ansible_net_hostname": "csr1",
+            "ansible_net_image": "bootflash:packages.conf",
+            "ansible_net_interfaces": {
+                "GigabitEthernet1": {
+                    "bandwidth": 1000000,
+                    "description": "MANAGEMENT_DO_NOT_CHANGE",
+                    "duplex": "Full",
+                    "ipv4": [
+                        {
+                            "address": "10.0.0.15",
+                            "subnet": "24"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": "5254.00a9.7e00",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "up",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet2": {
+                    "bandwidth": 1000000,
+                    "description": "Connects to csr3",
+                    "duplex": "Full",
+                    "ipv4": [
+                        {
+                            "address": "10.1.13.1",
+                            "subnet": "24"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": "5254.00d0.0f08",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "up",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet3": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "up",
+                    "macaddress": "5254.0000.af09",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "up",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet4": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "up",
+                    "macaddress": "5254.0029.f90a",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "up",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet5": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "up",
+                    "macaddress": "5254.0099.740b",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "up",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet6": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "down",
+                    "macaddress": "5254.0068.e80c",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "administratively down",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet7": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "down",
+                    "macaddress": "5254.0022.b00d",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "administratively down",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet8": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "down",
+                    "macaddress": "5254.00e1.240e",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "administratively down",
+                    "type": "CSR vNIC"
+                },
+                "GigabitEthernet9": {
+                    "bandwidth": 1000000,
+                    "description": null,
+                    "duplex": "Full",
+                    "ipv4": [],
+                    "lineprotocol": "down",
+                    "macaddress": "5254.00b2.f80f",
+                    "mediatype": "Virtual",
+                    "mtu": 1500,
+                    "operstatus": "administratively down",
+                    "type": "CSR vNIC"
+                },
+                "Loopback100": {
+                    "bandwidth": 8000000,
+                    "description": null,
+                    "duplex": null,
+                    "ipv4": [
+                        {
+                            "address": "10.200.1.20",
+                            "subnet": "24"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": null,
+                    "mediatype": null,
+                    "mtu": 1514,
+                    "operstatus": "up",
+                    "type": null
+                },
+                "Loopback101": {
+                    "bandwidth": 8000000,
+                    "description": null,
+                    "duplex": null,
+                    "ipv4": [
+                        {
+                            "address": "10.9.88.1",
+                            "subnet": "24"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": null,
+                    "mediatype": null,
+                    "mtu": 1514,
+                    "operstatus": "up",
+                    "type": null
+                },
+                "Loopback200": {
+                    "bandwidth": 8000000,
+                    "description": null,
+                    "duplex": null,
+                    "ipv4": [
+                        {
+                            "address": "10.200.100.1",
+                            "subnet": "32"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": null,
+                    "mediatype": null,
+                    "mtu": 1514,
+                    "operstatus": "up",
+                    "type": null
+                },
+                "Loopback222": {
+                    "bandwidth": 8000000,
+                    "description": null,
+                    "duplex": null,
+                    "ipv4": [
+                        {
+                            "address": "10.224.222.222",
+                            "subnet": "32"
+                        }
+                    ],
+                    "lineprotocol": "up",
+                    "macaddress": null,
+                    "mediatype": null,
+                    "mtu": 1514,
+                    "operstatus": "up",
+                    "type": null
+                }
+            },
+            "ansible_net_iostype": "IOS-XE",
+            "ansible_net_memfree_mb": 1832414.9375,
+            "ansible_net_memtotal_mb": 2077870.4765625,
+            "ansible_net_model": "CSR1000V",
+            "ansible_net_neighbors": {
+                "GigabitEthernet2": [
+                    {
+                        "host": "csr3.ntc.com",
+                        "port": "Gi2"
+                    }
+                ],
+                "GigabitEthernet4": [
+                    {
+                        "host": "csr2.ntc.com",
+                        "port": "Gi4"
+                    }
+                ],
+                "GigabitEthernet5": [
+                    {
+                        "host": "nxos-spine1.ntc.com",
+                        "port": "Ethernet1/5"
+                    }
+                ]
+            },
+            "ansible_net_python_version": "3.8.12",
+            "ansible_net_serialnum": "9SAGBHTUEE9",
+            "ansible_net_system": "ios",
+            "ansible_net_version": "17.01.01",
+            "ansible_network_resources": {}
+        },
+        "changed": false,
+        "failed": false
+    }
+}
+
+TASK [DEBUG OS VERSION] ****************************************************************************************************************************************
+ok: [csr1] => {
+    "ntc_ios_facts['ansible_facts']['ansible_net_version']": "17.01.01"
+}
+
+TASK [DEBUG SHORTHAND OS VERSION] ******************************************************************************************************************************
+ok: [csr1] => {
+    "ansible_net_version": "17.01.01"
+}
+
+PLAY RECAP *****************************************************************************************************************************************************
+csr1                       : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+ntc@ntc-training:lab-17 (master)$ 
