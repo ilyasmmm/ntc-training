@@ -1,0 +1,77 @@
+SCRIPT ---
+
+---
+
+- name: PING TEST AND TRACEROUTE
+  hosts: csr1
+  connection: ansible.netcommon.network_cli
+  gather_facts: false
+
+  vars:
+    dest: "10.0.0.15"
+
+  tasks:
+
+    - name: ISSUE PING
+      cisco.ios.ios_command:
+        commands: "ping {{ dest }} repeat 2"
+      register: output
+
+    - name: PARSE PING RESPONSE TO OBTAIN % OF SUCCESS
+      ansible.builtin.set_fact:
+        ping_pct: "{{ output.stdout.0 | regex_search('Success rate is (\\d+)\\s+percent') | regex_search('(\\d+)') }}"
+
+    - ansible.builtin.debug:
+        var: ping_pct
+
+    - name: PARSE PING RESPONSE TO OBTAIN % OF SUCCESS
+      ansible.builtin.set_fact:
+        ping_pct2: "{{ output.stdout.0 | regex_search('Success rate is (\\d+)\\s+percent') }}"
+
+    - ansible.builtin.debug:
+        var: ping_pct2
+  
+    - name: ALTERNATE OPTION FOR PARSING WITH REGEX
+      ansible.builtin.set_fact:
+        ping_data2: "{{ output.stdout.0 | regex_findall('Success rate is (\\d+)\\s+percent') | first }}"
+
+    - name: ALTERNATE DEBUG
+      ansible.builtin.debug:
+        var: ping_data2
+
+
+OUTPUT ---
+
+ntc@ntc-training:lab-14 (master)$ ansible-playbook -i inventory test-reachability.yml 
+
+PLAY [PING TEST AND TRACEROUTE] *********************************************************************************************************************************
+
+TASK [ISSUE PING] ***********************************************************************************************************************************************
+ok: [csr1]
+
+TASK [PARSE PING RESPONSE TO OBTAIN % OF SUCCESS] ***************************************************************************************************************
+ok: [csr1]
+
+TASK [ansible.builtin.debug] ************************************************************************************************************************************
+ok: [csr1] => {
+    "ping_pct": "100"
+}
+
+TASK [PARSE PING RESPONSE TO OBTAIN % OF SUCCESS] ***************************************************************************************************************
+ok: [csr1]
+
+TASK [ansible.builtin.debug] ************************************************************************************************************************************
+ok: [csr1] => {
+    "ping_pct2": "Success rate is 100 percent"
+}
+
+TASK [ALTERNATE OPTION FOR PARSING WITH REGEX] ******************************************************************************************************************
+ok: [csr1]
+
+TASK [ALTERNATE DEBUG] ******************************************************************************************************************************************
+ok: [csr1] => {
+    "ping_data2": "100"
+}
+
+PLAY RECAP ******************************************************************************************************************************************************
+csr1                       : ok=7    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
